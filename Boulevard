@@ -1,0 +1,32 @@
+import java.util.*;
+
+
+public class Boulevard {
+    public String nom;
+    public ArrayList<Arc> arc;
+
+    public Boulevard() {
+        this.arc = new ArrayList<>();
+    }
+
+    public void afficherListe(HashMap<String,Boulevard> Bd){
+        for(HashMap.Entry<String,Boulevard> b : Bd.entrySet()){
+            System.out.println(b.getValue());
+        }
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Boulevard : ").append(this.nom).append("\n");
+        sb.append("Arcs :\n");
+        for(Arc a : this.arc){
+            sb.append("  - ").append(a.nom)
+                    .append(" (temps = ").append(a.temps)
+                    .append(", tonnes = ").append(a.tonne)
+                    .append(" Boulevard Suivant ").append(a.Boulevardsuiv.nom)
+                    .append(")\n");
+        }
+        return sb.toString();
+    }
+}
