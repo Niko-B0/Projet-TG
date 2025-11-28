@@ -1,0 +1,70 @@
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.ArrayList;
+
+
+public class Entreprise {
+
+    public void chemin_Complet(Boulevard depart, HashMap<String, Boulevard> graph) {
+
+        LinkedList<Arc> parcour = new LinkedList<>();
+        LinkedList<Arc> parcour_stock = new LinkedList<>();
+        LinkedList<ArrayList<Arc>> file = new LinkedList<>();
+        LinkedList<ArrayList<Arc>> file_stock = new LinkedList<>();
+
+        Boulevard b = depart;
+        int compteur = this.compteur(graph);
+
+        while (parcour.size() < compteur) {
+            int cond = this.condition(b, parcour);
+
+            if (cond > 0) {
+                file.offer(b.arc);
+                parcour.offer(b.arc.get(cond));
+                b = b.arc.get(cond).Boulevardsuiv;
+            } else {
+                if (file.size() < file_stock.size()) {
+                    file = new LinkedList<>(file_stock);
+                    parcour = new LinkedList<>(parcour_stock);
+                }
+
+                boolean bool = false;
+
+                for (int i = 0; i < file.size(); i++) {
+                    ArrayList<Arc> element = file.get(i);
+                    if (!bool) {
+                        if (element != null && !element.isEmpty()) {
+                            file_stock = new LinkedList<>(file);
+                            bool = true;
+                            element.remove(0);
+                            if (!element.isEmpty()) {
+                                b = element.get(0).Boulevardprec;
+                            }
+                        }
+                    } else {
+                        file.remove(i);
+                        parcour.remove(i);
+                        i--;
+                    }
+                }
+            }
+        }
+    }
+
+    private int condition(Boulevard depart, LinkedList<Arc> parcour){
+        int compte = 0;
+        for (Arc element : parcour) {
+            if (compte >= depart.arc.size()) {break;}
+            if (element.nom.equals(depart.arc.get(compte).nom)){compte++;}
+        }
+        return compte;
+    }
+
+    private int compteur(HashMap<String,Boulevard> graph) {
+        int compteur = 0;
+        for (HashMap.Entry<String, Boulevard> element : graph.entrySet()) {
+            for (Arc arc : element.getValue().arc) { compteur++; }
+        }
+        return compteur;
+    }
+}
