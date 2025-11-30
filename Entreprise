@@ -1,70 +1,236 @@
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.ArrayList;
-
+import java.util.*;
 
 public class Entreprise {
+    public void GenerationDemande(HashMap<String,Boulevard> boulevard){
+        Random r = new Random();
+        List<Boulevard> listeBoulevards = new ArrayList<>(boulevard.values());
+        Boulevard b = listeBoulevards.get(r.nextInt(listeBoulevards.size()));
+        if (b.arc.size() > 0) {
+            Arc rueChoisie = b.arc.get(r.nextInt(b.arc.size()));
+            rueChoisie.demande = true;
+        }
+    }
 
-    public void chemin_Complet(Boulevard depart, HashMap<String, Boulevard> graph) {
-
-        LinkedList<Arc> parcour = new LinkedList<>();
-        LinkedList<Arc> parcour_stock = new LinkedList<>();
-        LinkedList<ArrayList<Arc>> file = new LinkedList<>();
-        LinkedList<ArrayList<Arc>> file_stock = new LinkedList<>();
-
-        Boulevard b = depart;
-        int compteur = this.compteur(graph);
-
-        while (parcour.size() < compteur) {
-            int cond = this.condition(b, parcour);
-
-            if (cond > 0) {
-                file.offer(b.arc);
-                parcour.offer(b.arc.get(cond));
-                b = b.arc.get(cond).Boulevardsuiv;
-            } else {
-                if (file.size() < file_stock.size()) {
-                    file = new LinkedList<>(file_stock);
-                    parcour = new LinkedList<>(parcour_stock);
+    public void AfficherDemandes(HashMap<String, Boulevard> ville) {
+        for (HashMap.Entry<String, Boulevard> entry : ville.entrySet()) {
+            Boulevard b = entry.getValue();
+            for (Arc a : b.arc) {
+                if (Boolean.TRUE.equals(a.demande)) {
+                    System.out.println("Rue en demande : " + a.nom);
                 }
+            }
+        }
+    }
 
-                boolean bool = false;
+    public Boulevard retournerDemande(HashMap<String, Boulevard> ville) {
+        for (HashMap.Entry<String, Boulevard> entry : ville.entrySet()) {
+            Boulevard b = entry.getValue();
+            for (Arc a : b.arc) {
+                if (Boolean.TRUE.equals(a.demande)) {
+                    return b;
+                }
+            }
+        }
+        return null;
+    }
 
-                for (int i = 0; i < file.size(); i++) {
-                    ArrayList<Arc> element = file.get(i);
-                    if (!bool) {
-                        if (element != null && !element.isEmpty()) {
-                            file_stock = new LinkedList<>(file);
-                            bool = true;
-                            element.remove(0);
-                            if (!element.isEmpty()) {
-                                b = element.get(0).Boulevardprec;
-                            }
+    public void dijkstra(HashMap<String, Boulevard> ville, Boulevard source) {
+        for (Boulevard b : ville.values()) {
+            b.temps = Integer.MAX_VALUE;
+            b.arcPred = null;
+            b.marque = false;
+        }
+        source.temps = 0;
+
+        ArrayList<Boulevard> attente = new ArrayList<>();
+        attente.add(source);
+
+        while (!attente.isEmpty()) {
+            Boulevard courant = getMin(attente);
+            attente.remove(courant);
+            courant.marque = true;
+            for (Arc a : courant.arc) {
+                Boulevard succ = a.Boulevardsuiv;
+                if (!succ.marque) {
+                    int nouveauTemps = courant.temps + a.temps;
+                    if (nouveauTemps  < succ.temps) {
+                        succ.temps = nouveauTemps;
+                        succ.arcPred = a;
+                        if (!attente.contains(succ)) {
+                            attente.add(succ);
                         }
-                    } else {
-                        file.remove(i);
-                        parcour.remove(i);
-                        i--;
                     }
                 }
             }
         }
     }
 
-    private int condition(Boulevard depart, LinkedList<Arc> parcour){
-        int compte = 0;
-        for (Arc element : parcour) {
-            if (compte >= depart.arc.size()) {break;}
-            if (element.nom.equals(depart.arc.get(compte).nom)){compte++;}
+    public void afficherChemin(Boulevard destination) {
+        if (destination == null) {
+            System.out.println("Boulevard introuvable.");
+            return;
         }
-        return compte;
+        if (destination.temps == Integer.MAX_VALUE) {
+            System.out.println("Aucun chemin trouvé jusqu’à " + destination.nom);
+            return;
+        }
+        ArrayList<String> chemin = new ArrayList<>();
+        Boulevard courant = destination;
+
+        while (courant != null) {
+            chemin.add(0, courant.nom); // On ajoute au début pour inverser l’ordre
+            if (courant.arcPred != null)
+                courant = courant.arcPred.Boulevardprec;
+            else
+                break;
+        }
+        System.out.println("Chemin le plus court :");
+        for (int i = 0; i < chemin.size(); i++) {
+            System.out.print(chemin.get(i));
+            if (i < chemin.size() - 1) System.out.print(" -> ");
+        }
+        System.out.println("\nTemps total : " + destination.temps);
     }
 
-    private int compteur(HashMap<String,Boulevard> graph) {
-        int compteur = 0;
-        for (HashMap.Entry<String, Boulevard> element : graph.entrySet()) {
-            for (Arc arc : element.getValue().arc) { compteur++; }
+
+    public Boulevard getMin(ArrayList<Boulevard> liste) {
+        Boulevard min = null;
+        int meilleurTemps = Integer.MAX_VALUE;
+
+        for (Boulevard b : liste) {
+            if (b.temps < meilleurTemps) {
+                meilleurTemps = b.temps;
+                min = b;
+            }
         }
-        return compteur;
+        return min;
     }
+
+    public Arc getMinArc(Boulevard b) {
+        Arc minArc = b.arc.get(0);
+        for (Arc a : b.arc) {
+            if (a.temps < minArc.temps) {
+                minArc = a;
+            }
+        }
+        return minArc;
+    }
+
+
+    //première version avec Djirka
+    public void Parcours(HashMap<String, Boulevard> ville, Boulevard source) {
+        Boulevard courant = source;
+        int tempsTotal = 0;
+
+        ArrayList<String> cheminGlobal = new ArrayList<>();
+        cheminGlobal.add(courant.nom);
+
+        ArrayList<Arc> demandes = new ArrayList<>();
+        for (Boulevard b : ville.values()) {
+            for (Arc a : b.arc) {
+                if (Boolean.TRUE.equals(a.demande)) {
+                    demandes.add(a);
+                }
+            }
+        }
+
+        while (!demandes.isEmpty()) {
+
+            dijkstra(ville, courant);
+            Arc meilleureRue = TrouverMeilleurTemps(demandes);
+            if (meilleureRue == null) {
+                System.out.println("Impossible d'atteindre toutes les rues en demande.");
+                break;
+            }
+
+            Boulevard departRue = meilleureRue.Boulevardprec;
+            Boulevard arriveeRue = meilleureRue.Boulevardsuiv;
+
+            ArrayList<String> sousChemin = reconstruireChemin(departRue);
+
+            if (sousChemin.isEmpty()) {
+                System.out.println("Erreur : impossible de rejoindre " + departRue.nom);
+                break;
+            }
+
+            for (int i = 1; i < sousChemin.size(); i++) {
+                cheminGlobal.add(sousChemin.get(i));
+            }
+
+            if (!cheminGlobal.get(cheminGlobal.size() - 1).equals(arriveeRue.nom)) {
+                cheminGlobal.add(arriveeRue.nom);
+            }
+
+            tempsTotal += departRue.temps + meilleureRue.temps;
+
+            demandes.remove(meilleureRue);
+            meilleureRue.demande = false;
+
+            courant = arriveeRue;
+
+
+        }
+
+        if (!courant.equals(source)) {
+            dijkstra(ville, courant);
+            ArrayList<String> retour = reconstruireChemin(source);
+
+            if (!retour.isEmpty()) {
+                for (int i = 1; i < retour.size(); i++) {
+                    cheminGlobal.add(retour.get(i));
+                }
+                tempsTotal += source.temps; // source.temps après Dijkstra(courant)
+            }
+        }
+
+        System.out.println("Chemin global :");
+        for (int i = 0; i < cheminGlobal.size(); i++) {
+            System.out.print(cheminGlobal.get(i));
+            if (i < cheminGlobal.size() - 1) System.out.print(" -> ");
+        }
+        System.out.println("\nTemps total : " + tempsTotal);
+    }
+
+    public Arc TrouverMeilleurTemps(ArrayList<Arc> demandes){
+        Arc meilleureRue = null;
+        Boulevard departRue = null;
+        int meilleurTemps = Integer.MAX_VALUE;
+
+        for (Arc a : demandes) {
+            Boulevard prec = a.Boulevardprec;
+
+            if (prec.temps == Integer.MAX_VALUE) {
+                continue;
+            }
+            int cout = prec.temps;
+            if (cout < meilleurTemps) {
+                meilleurTemps = cout;
+                meilleureRue = a;
+                departRue = prec;
+
+            }
+        }
+        return meilleureRue;
+    }
+
+    private ArrayList<String> reconstruireChemin(Boulevard destination) {
+        ArrayList<String> chemin = new ArrayList<>();
+
+        if (destination == null || destination.temps == Integer.MAX_VALUE) {
+            return chemin; // chemin vide = inatteignable
+        }
+
+        Boulevard courant = destination;
+        while (courant != null) {
+            chemin.add(0, courant.nom); // on ajoute au début pour inverser
+            if (courant.arcPred != null) {
+                courant = courant.arcPred.Boulevardprec;
+            } else {
+                break;
+            }
+        }
+
+        return chemin;
+    }
+
 }
