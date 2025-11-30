@@ -4,6 +4,10 @@ import java.util.*;
 public class Boulevard {
     public String nom;
     public ArrayList<Arc> arc;
+    public Arc arcPred = null;    // l’arc qui mène à ce boulevard
+    public boolean marque = false;
+    public int temps;
+
 
     public Boulevard() {
         this.arc = new ArrayList<>();
