@@ -6,36 +6,26 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class LectureDoc {
-
     public HashMap<String, Boulevard> ouvrirFichier() {
         try {
             BufferedReader br1 = new BufferedReader(new InputStreamReader(new FileInputStream("src/reseauBoulevard.txt")));
-
             HashMap<String, Boulevard> reseau = new HashMap<>();
             String ligne;
-
             while ((ligne = br1.readLine()) != null) {
                 if (ligne.isBlank()) continue;
-
                 String intersection = ligne.split(";")[0];
                 Boulevard Bv = new Boulevard();
                 Bv.nom = intersection;
                 reseau.put(intersection, Bv );
             }
-
             br1.close();
-
             BufferedReader br2 = new BufferedReader(new InputStreamReader(new FileInputStream("src/reseauBoulevard.txt")));
-
             while ((ligne = br2.readLine()) != null) {
                 if (ligne.isBlank()) continue;
-
                 traiterLigne(ligne, reseau);
             }
-
             br2.close();
             return reseau;
-
         } catch (IOException e) {
             System.out.println("Erreur de lecture : " + e.getMessage());
             return null;
