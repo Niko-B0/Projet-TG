@@ -2,10 +2,10 @@ import java.io.*;
 import java.util.*;
 
 public class Arc {
-    String nom;
-
-    Boulevard Boulevardprec;
-    Boulevard Boulevardsuiv;
+    public String nom;
+    public Boolean demande;
+    public Boulevard Boulevardprec;
+    public Boulevard Boulevardsuiv;
 
     int temps;
     int tonne;
@@ -14,8 +14,19 @@ public class Arc {
         LectureDoc doc = new LectureDoc() ;
         HashMap<String,Boulevard> boulevard = doc.ouvrirFichier();
         Boulevard b = new Boulevard();
-        b.afficherListe(boulevard);
+        //b.afficherListe(boulevard);
 
+        Entreprise e = new Entreprise();
+
+        e.GenerationDemande(boulevard);
+        //e.GenerationDemande(boulevard);
+        //e.GenerationDemande(boulevard);
+        e.AfficherDemandes(boulevard);
+        Boulevard source = boulevard.get("Nation");
+        Boulevard destination = e.retournerDemande(boulevard);
+        //e.Parcours(boulevard, source);
+        e.dijkstra(boulevard, source);
+        e.afficherChemin(destination);
     }
 }
 
