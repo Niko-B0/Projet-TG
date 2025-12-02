@@ -22,11 +22,13 @@ public class Arc {
         //e.GenerationDemande(boulevard);
         //e.GenerationDemande(boulevard);
         e.AfficherDemandes(boulevard);
-        Boulevard source = boulevard.get("Nation");
-        Boulevard destination = e.retournerDemande(boulevard);
-        //e.Parcours(boulevard, source);
-        e.dijkstra(boulevard, source);
-        e.afficherChemin(destination);
+        //Boulevard source = boulevard.get("Nation");
+        Boulevard source = boulevard.get("Intersection0");
+
+        //Boulevard destination = e.retournerDemande(boulevard);
+        e.Parcours(boulevard, source);
+        //e.dijkstra(boulevard, source);
+        //e.afficherChemin(destination);
     }
 }
 
