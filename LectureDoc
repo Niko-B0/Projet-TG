@@ -8,21 +8,24 @@ import java.util.HashMap;
 public class LectureDoc {
     public HashMap<String, Boulevard> ouvrirFichier() {
         try {
-            BufferedReader br1 = new BufferedReader(new InputStreamReader(new FileInputStream("src/reseauBoulevard.txt")));
+            //BufferedReader br1 = new BufferedReader(new InputStreamReader(new FileInputStream("src/reseauBoulevard.txt")));
+            BufferedReader br1 = new BufferedReader(new InputStreamReader(new FileInputStream("src/montpellier_3500_optimise.txt")));
             HashMap<String, Boulevard> reseau = new HashMap<>();
             String ligne;
             while ((ligne = br1.readLine()) != null) {
                 if (ligne.isBlank()) continue;
-                String intersection = ligne.split(";")[0];
+                String[] t = ligne.split(";");
+                String nomIntersection = t[1];
                 Boulevard Bv = new Boulevard();
-                Bv.nom = intersection;
-                reseau.put(intersection, Bv );
+                Bv.nom = nomIntersection;
+                reseau.put(nomIntersection, Bv);
             }
             br1.close();
-            BufferedReader br2 = new BufferedReader(new InputStreamReader(new FileInputStream("src/reseauBoulevard.txt")));
+            //BufferedReader br2 = new BufferedReader(new InputStreamReader(new FileInputStream("src/reseauBoulevard.txt")));
+            BufferedReader br2 = new BufferedReader(new InputStreamReader(new FileInputStream("src/montpellier_3500_optimise.txt")));
             while ((ligne = br2.readLine()) != null) {
                 if (ligne.isBlank()) continue;
-                traiterLigne(ligne, reseau);
+                traiterLigne2(ligne, reseau);
             }
             br2.close();
             return reseau;
@@ -41,6 +44,33 @@ public class LectureDoc {
         Boulevard b = map.get(nomIntersection);
 
         for (int i = 1; i + 3 < t.length; i += 4) {
+
+            String nomRue = t[i];
+            int temps = Integer.parseInt(t[i + 1]);
+            int tonne = Integer.parseInt(t[i + 2]);
+            String intersectionSuivante = t[i + 3];
+
+            Arc a = new Arc();
+            a.nom = nomRue;
+            a.temps = temps;
+            a.tonne = tonne;
+
+            a.Boulevardprec = b;
+            a.Boulevardsuiv = map.get(intersectionSuivante);
+
+            b.arc.add(a);
+        }
+    }
+
+    private void traiterLigne2(String ligne, HashMap<String, Boulevard> map) {
+
+        String[] t = ligne.split(";");
+        String quartier = t[0];
+        String nomIntersection = t[1];
+
+        Boulevard b = map.get(nomIntersection);
+
+        for (int i = 2; i + 3 < t.length; i += 4) {
 
             String nomRue = t[i];
             int temps = Integer.parseInt(t[i + 1]);
