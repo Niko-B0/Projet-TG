@@ -2,6 +2,7 @@ import java.util.*;
 
 
 public class Boulevard {
+    public String quartier;
     public String nom;
     public ArrayList<Arc> arc;
     public Arc arcPred = null;    // l’arc qui mène à ce boulevard
@@ -29,8 +30,10 @@ public class Boulevard {
                     .append(" (temps = ").append(a.temps)
                     .append(", tonnes = ").append(a.tonne)
                     .append(" Boulevard Suivant ").append(a.Boulevardsuiv.nom)
+                    .append("Quartier : ").append(quartier).append("\n")
                     .append(")\n");
         }
         return sb.toString();
     }
 }
+
