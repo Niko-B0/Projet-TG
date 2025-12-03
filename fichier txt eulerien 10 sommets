@@ -1,3 +1,5 @@
+eulerien
+
 Nation;BdDiderot;5;100;GareDeLyon;BdVoltaire;8;100;Republique;
 GareDeLyon;BdDiderot;5;100;Nation;RueDeLyon;3;100;Bastille;
 Republique;BdVoltaire;8;100;Nation;BdBeaumarchais;5;100;Bastille;RueTurbigo;4;100;LesHalles;GrandBoulevard;16;100;PalaisGarnier;
@@ -8,3 +10,17 @@ Concorde;RueRoyale;3;100;PalaisGarnier;BdRaspail;8;100;CatacombesDeParis;
 PalaisGarnier;RueRoyale;3;100;Concorde;AvenueDeLOpera;5;100;LesHalles;GrandBoulevard;16;100;Republique;Ruerandom1;5;100;ArcDeTriomphe;
 LesHalles;AvenueDeLOpera;5;100;PalaisGarnier;RueDeRivoli;5;100;Bastille;RueTurbigo;4;100;Republique;BdSaintMichel;10;100;CatacombesDeParis;
 CatacombesDeParis;BdRaspail;8;100;Concorde;BdSaintMichel;10;100;LesHalles;AugusteBlanqui;5;100;PlaceDItalie;Ruerandom2;5;100;ArcDeTriomphe;
+
+
+semi eulerien
+
+Nation;FaubourgSaintAntoine;5;100;Bastille;BdDiderot;5;100;GareDeLyon;BdVoltaire;8;100;Republique;RueRandom1;11;100;ArcDeTriomphe
+GareDeLyon;BdDiderot;5;100;Nation;RueDeLyon;3;100;Bastille;
+Republique;BdVoltaire;8;100;Nation;BdBeaumarchais;5;100;Bastille;RueTurbigo;4;100;LesHalles;GrandBoulevard;16;100;PalaisGarnier;
+Bastille;RueDeLyon;3;100;GareDeLyon;FaubourgSaintAntoine;5;100;Nation;BdBeaumarchais;5;100;Republique;RueDeRivoli;5;100;LesHalles;BdDeLHopital;7;100;PlaceDItalie;
+PlaceDItalie;BdDeLHopital;7;100;Bastille;AugusteBlanqui;5;100;CatacombesDeParis;
+ArcDeTriomphe;AvenueDesChampsElysees;5;100;Concorde;
+Concorde;AvenueDesChampsElysees;5;100;ArcDeTriomphe;RueRoyale;3;100;PalaisGarnier;BdRaspail;8;100;CatacombesDeParis;
+PalaisGarnier;RueRoyale;3;100;Concorde;AvenueDeLOpera;5;100;LesHalles;GrandBoulevard;16;100;Republique;
+LesHalles;AvenueDeLOpera;5;100;PalaisGarnier;RueDeRivoli;5;100;Bastille;RueTurbigo;4;100;Republique;BdSaintMichel;10;100;CatacombesDeParis;
+CatacombesDeParis;BdRaspail;8;100;Concorde;BdSaintMichel;10;100;LesHalles;AugusteBlanqui;5;100;PlaceDItalie;
