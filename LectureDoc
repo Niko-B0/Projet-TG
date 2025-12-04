@@ -6,23 +6,27 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class LectureDoc {
-    public HashMap<String, Boulevard> ouvrirFichier() {
+
+    public HashMap<String, Boulevard> ouvrirFichierH1() {
         try {
-            BufferedReader br1 = new BufferedReader(new InputStreamReader(new FileInputStream("src/reseauBoulevard.txt")));
+            //BufferedReader br1 = new BufferedReader(new InputStreamReader(new FileInputStream("src/reseauBoulevard.txt")));
+            BufferedReader br1 = new BufferedReader(new InputStreamReader(new FileInputStream("src/montpellier_3500_optimise_indice_final.txt")));
             HashMap<String, Boulevard> reseau = new HashMap<>();
             String ligne;
             while ((ligne = br1.readLine()) != null) {
                 if (ligne.isBlank()) continue;
-                String intersection = ligne.split(";")[0];
+                String[] t = ligne.split(";");
+                String nomIntersection = t[1];
                 Boulevard Bv = new Boulevard();
-                Bv.nom = intersection;
-                reseau.put(intersection, Bv );
+                Bv.nom = nomIntersection;
+                reseau.put(nomIntersection, Bv);
             }
             br1.close();
-            BufferedReader br2 = new BufferedReader(new InputStreamReader(new FileInputStream("src/reseauBoulevard.txt")));
+            //BufferedReader br2 = new BufferedReader(new InputStreamReader(new FileInputStream("src/reseauBoulevard.txt")));
+            BufferedReader br2 = new BufferedReader(new InputStreamReader(new FileInputStream("src/montpellier_3500_optimise_indice_final.txt")));
             while ((ligne = br2.readLine()) != null) {
                 if (ligne.isBlank()) continue;
-                traiterLigne(ligne, reseau);
+                traiterLigneH1(ligne, reseau);
             }
             br2.close();
             return reseau;
@@ -32,23 +36,179 @@ public class LectureDoc {
         }
     }
 
+    public HashMap<String, Boulevard> ouvrirFichierH2() {
+        try {
+            //BufferedReader br1 = new BufferedReader(new InputStreamReader(new FileInputStream("src/reseauBoulevard.txt")));
+            BufferedReader br1 = new BufferedReader(new InputStreamReader(new FileInputStream("src/montpellier_3500_optimise_indice_final.txt")));
+            HashMap<String, Boulevard> reseau = new HashMap<>();
+            String ligne;
+            while ((ligne = br1.readLine()) != null) {
+                if (ligne.isBlank()) continue;
+                String[] t = ligne.split(";");
+                String nomIntersection = t[1];
+                Boulevard Bv = new Boulevard();
+                Bv.nom = nomIntersection;
+                reseau.put(nomIntersection, Bv);
+            }
+            br1.close();
+            //BufferedReader br2 = new BufferedReader(new InputStreamReader(new FileInputStream("src/reseauBoulevard.txt")));
+            BufferedReader br2 = new BufferedReader(new InputStreamReader(new FileInputStream("src/montpellier_3500_optimise_indice_final.txt")));
+            while ((ligne = br2.readLine()) != null) {
+                if (ligne.isBlank()) continue;
+                traiterLigneH2(ligne, reseau);
+            }
+            br2.close();
+            return reseau;
+        } catch (IOException e) {
+            System.out.println("Erreur de lecture : " + e.getMessage());
+            return null;
+        }
+    }
 
-    private void traiterLigne(String ligne, HashMap<String, Boulevard> map) {
+    public HashMap<String, Boulevard> ouvrirFichierH3() {
+        try {
+            //BufferedReader br1 = new BufferedReader(new InputStreamReader(new FileInputStream("src/reseauBoulevard.txt")));
+            BufferedReader br1 = new BufferedReader(new InputStreamReader(new FileInputStream("src/montpellier_3500_optimise_indice_final.txt")));
+            HashMap<String, Boulevard> reseau = new HashMap<>();
+            String ligne;
+            while ((ligne = br1.readLine()) != null) {
+                if (ligne.isBlank()) continue;
+                String[] t = ligne.split(";");
+                String nomIntersection = t[1];
+                Boulevard Bv = new Boulevard();
+                Bv.nom = nomIntersection;
+                reseau.put(nomIntersection, Bv);
+            }
+            br1.close();
+            //BufferedReader br2 = new BufferedReader(new InputStreamReader(new FileInputStream("src/reseauBoulevard.txt")));
+            BufferedReader br2 = new BufferedReader(new InputStreamReader(new FileInputStream("src/montpellier_3500_optimise_indice_final.txt")));
+            while ((ligne = br2.readLine()) != null) {
+                if (ligne.isBlank()) continue;
+                traiterLigneH2(ligne, reseau);
+            }
+            br2.close();
+            return reseau;
+        } catch (IOException e) {
+            System.out.println("Erreur de lecture : " + e.getMessage());
+            return null;
+        }
+    }
+
+    public void traiterLigneH1(String ligne, HashMap<String, Boulevard> map) {
 
         String[] t = ligne.split(";");
-        String nomIntersection = t[0];
+        String quartier = t[0];
+        String nomIntersection = t[1];
 
         Boulevard b = map.get(nomIntersection);
 
-        for (int i = 1; i + 3 < t.length; i += 4) {
+        for (int i = 2; i + 4 < t.length; i += 5) {
 
             String nomRue = t[i];
-            int temps = Integer.parseInt(t[i + 1]);
-            int tonne = Integer.parseInt(t[i + 2]);
-            String intersectionSuivante = t[i + 3];
+            int indice = Integer.parseInt(t[i + 1]);  // tu ne t'en sers plus pour le sens
+            int temps = Integer.parseInt(t[i + 2]);
+            int tonne = Integer.parseInt(t[i + 3]);
+            String intersectionSuivante = t[i + 4];
+
+            Boulevard b2 = map.get(intersectionSuivante);
 
             Arc a = new Arc();
             a.nom = nomRue;
+            a.simpleEtSensDouble = (indice == 1);  // tu peux garder cette info
+            a.temps = temps;
+            a.tonne = tonne;
+            a.Boulevardprec = b;
+            a.Boulevardsuiv = b2;
+
+            if (!b.arc.contains(a)) {
+                b.arc.add(a);
+            }
+
+            Arc aInverse = new Arc();
+            aInverse.nom = nomRue;
+            aInverse.simpleEtSensDouble = (indice == 1);
+            aInverse.temps = temps;
+            aInverse.tonne = tonne;
+            aInverse.Boulevardprec = b2;
+            aInverse.Boulevardsuiv = b;
+
+            if (!b2.arc.contains(aInverse)) {
+                b2.arc.add(aInverse);
+            }
+        }
+    }
+
+
+    public void traiterLigneH3(String ligne, HashMap<String, Boulevard> map) {
+
+        String[] t = ligne.split(";");
+        String quartier = t[0];
+        String nomIntersection = t[1];
+
+        Boulevard b = map.get(nomIntersection);
+
+        for (int i = 2; i + 4 < t.length; i += 5) {
+
+            String nomRue = t[i];
+            int indice = Integer.parseInt(t[i + 1]);
+            int temps = Integer.parseInt(t[i + 2]);
+            int tonne = Integer.parseInt(t[i + 3]);
+            String intersectionSuivante = t[i + 4];
+
+            Boulevard b2 = map.get(intersectionSuivante);
+
+            // --- ARC NORMAL A → B ---
+            Arc a = new Arc();
+            a.nom = nomRue;
+            a.simpleEtSensDouble = (indice == 1);
+            a.temps = temps;
+            a.tonne = tonne;
+            a.Boulevardprec = b;
+            a.Boulevardsuiv = b2;
+
+            // Ajout si pas déjà présent
+            if (!b.arc.contains(a)) {
+                b.arc.add(a);
+            }
+
+            // --- ARC INVERSE (uniquement si indice == 1) ---
+            if (indice == 1) {
+                Arc a2 = new Arc();
+                a2.nom = nomRue;
+                a2.simpleEtSensDouble = true;
+                a2.temps = temps;
+                a2.tonne = tonne;
+                a2.Boulevardprec = b2;
+                a2.Boulevardsuiv = b;
+
+                if (!b2.arc.contains(a2)) {
+                    b2.arc.add(a2);
+                }
+            }
+        }
+    }
+
+
+
+    private void traiterLigneH2(String ligne, HashMap<String, Boulevard> map) {
+
+        String[] t = ligne.split(";");
+        String quartier = t[0];
+        String nomIntersection = t[1];
+
+        Boulevard b = map.get(nomIntersection);
+
+        for (int i = 2; i + 4 < t.length; i += 5) {
+
+            String nomRue = t[i];
+            int indice = Integer.parseInt(t[i + 1]); // 0 ou 1
+            int temps = Integer.parseInt(t[i + 2]);
+            int tonne = Integer.parseInt(t[i + 3]);
+            String intersectionSuivante = t[i + 4];
+
+            Arc a = new Arc();
+            a.nom = nomRue;
+            a.simpleEtSensDouble = (indice == 1); // stockage booléen
             a.temps = temps;
             a.tonne = tonne;
 
