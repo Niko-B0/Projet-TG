@@ -34,6 +34,33 @@ public class Entreprise {
         return null;
     }
 
+    public void GenererPointCollecte(HashMap<String, Boulevard> ville) {
+
+        // Liste des 40 sommets aléatoires
+        int[] sommets = {
+                312, 2840, 1187, 42, 1993, 274, 3301, 165, 2876, 904,
+                1783, 2664, 59, 1449, 2390, 313, 2701, 181, 3279, 721,
+                3084, 118, 349, 2540, 1902, 2210, 873, 1421, 3177, 267,
+                2590, 3401, 194, 813, 1032, 2688, 152, 1436, 989, 3330
+        };
+
+        // D'abord tout mettre à false
+        for (Boulevard b : ville.values()) {
+            b.ptDeCollecte = false;
+        }
+
+        // Mettre à true les intersections correspondantes
+        for (int id : sommets) {
+            String cle = "Intersection" + id;
+            Boulevard b = ville.get(cle);
+
+            if (b != null) {
+                b.ptDeCollecte = true;
+            }
+        }
+    }
+
+
     public void dijkstra(HashMap<String, Boulevard> ville, Boulevard source) {
         for (Boulevard b : ville.values()) {
             b.temps = Integer.MAX_VALUE;
@@ -92,7 +119,6 @@ public class Entreprise {
         System.out.println("\nTemps total : " + destination.temps);
     }
 
-
     public Boulevard getMin(ArrayList<Boulevard> liste) {
         Boulevard min = null;
         int meilleurTemps = Integer.MAX_VALUE;
@@ -115,7 +141,6 @@ public class Entreprise {
         }
         return minArc;
     }
-
 
     //première version avec Djirka
     public void Parcours(HashMap<String, Boulevard> ville, Boulevard source) {
@@ -167,8 +192,6 @@ public class Entreprise {
             meilleureRue.demande = false;
 
             courant = arriveeRue;
-
-
         }
 
         if (!courant.equals(source)) {
@@ -231,6 +254,196 @@ public class Entreprise {
         }
 
         return chemin;
+    }
+
+
+
+
+    private ArrayList<Boulevard> getPointsCollecte(HashMap<String, Boulevard> ville) {
+        ArrayList<Boulevard> points = new ArrayList<>();
+        for (Boulevard b : ville.values()) {
+            if (b.ptDeCollecte) {
+                points.add(b);
+            }
+        }
+        return points;
+    }
+
+
+    private int[] construireMST(int[][] dist, int racine) {
+        int n = dist.length;
+        int[] parent = new int[n];          // parent[i] = père de i dans l'arbre
+        int[] cle = new int[n];             // poids minimal pour raccorder i
+        boolean[] dansMST = new boolean[n];
+
+        Arrays.fill(cle, Integer.MAX_VALUE);
+        Arrays.fill(parent, -1);
+        cle[racine] = 0;
+
+        for (int k = 0; k < n - 1; k++) {
+            int u = -1;
+            int min = Integer.MAX_VALUE;
+
+            // choisir le sommet non encore pris avec la plus petite clé
+            for (int i = 0; i < n; i++) {
+                if (!dansMST[i] && cle[i] < min) {
+                    min = cle[i];
+                    u = i;
+                }
+            }
+
+            if (u == -1) break; // graph non connexe (sécurité)
+
+            dansMST[u] = true;
+
+            // mise à jour des voisins
+            for (int v = 0; v < n; v++) {
+                if (!dansMST[v] && dist[u][v] < cle[v]) {
+                    cle[v] = dist[u][v];
+                    parent[v] = u;
+                }
+            }
+        }
+
+        return parent;
+    }
+
+    private void dfsMST(int u,
+                        ArrayList<ArrayList<Integer>> adj,
+                        boolean[] visite,
+                        ArrayList<Integer> ordre) {
+        visite[u] = true;
+        ordre.add(u); // préfixe : on ajoute le sommet dès son entrée
+
+        for (int v : adj.get(u)) {
+            if (!visite[v]) {
+                dfsMST(v, adj, visite, ordre);
+            }
+        }
+    }
+
+
+    public ArrayList<String> tourneeMST(HashMap<String, Boulevard> ville, Boulevard depot) {
+        int tempsTotal = 0;
+        int nbAretes = 0;
+
+        ArrayList<Boulevard> points = getPointsCollecte(ville);
+
+        // S'assurer que le dépôt est dans la liste en première position
+        int indexDepot = -1;
+        for (int i = 0; i < points.size(); i++) {
+            if (points.get(i) == depot) {
+                indexDepot = i;
+                break;
+            }
+        }
+        if (indexDepot == -1) {
+            points.add(0, depot);
+        } else if (indexDepot != 0) {
+            Collections.swap(points, 0, indexDepot);
+        }
+
+        int n = points.size();
+        if (n <= 1) {
+            return new ArrayList<>();
+        }
+
+        // 2. Matrice des plus courts chemins entre tous les points
+        int[][] dist = new int[n][n];
+
+        for (int i = 0; i < n; i++) {
+            Boulevard source = points.get(i);
+            dijkstra(ville, source);  // met à jour .temps / .arcPred pour tous les boulevards
+
+            for (int j = 0; j < n; j++) {
+                Boulevard dest = points.get(j);
+                dist[i][j] = dest.temps;
+            }
+        }
+
+        // 3. Construire le MST avec Prim en prenant 0 (le dépôt) comme racine
+        int[] parent = construireMST(dist, 0);
+
+        // 4. Transformer parent[] en liste d’adjacence
+        ArrayList<ArrayList<Integer>> adj = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            adj.add(new ArrayList<>());
+        }
+        for (int v = 0; v < n; v++) {
+            if (parent[v] != -1) {
+                int p = parent[v];
+                adj.get(p).add(v);
+                adj.get(v).add(p); // l’arbre est non orienté
+            }
+        }
+
+        // 5. Parcours préfixe du MST à partir du dépôt (0)
+        boolean[] visite = new boolean[n];
+        ArrayList<Integer> ordre = new ArrayList<>();
+        dfsMST(0, adj, visite, ordre);
+
+        // 6. Construire la tournée réelle dans le graphe de rues
+        ArrayList<String> cheminGlobal = new ArrayList<>();
+        Boulevard courant = depot;
+
+        for (int k = 1; k < ordre.size(); k++) {
+            int idx = ordre.get(k);
+            Boulevard cible = points.get(idx);
+
+            if (cible == courant) continue;
+
+            // plus court chemin courant -> cible
+            dijkstra(ville, courant);
+            ArrayList<String> sousChemin = reconstruireChemin(cible);
+
+            // Calculer temps et nombre d'arêtes du sous-chemin
+            for (int x = 0; x < sousChemin.size() - 1; x++) {
+                Boulevard u = ville.get(sousChemin.get(x));
+                Boulevard v = ville.get(sousChemin.get(x + 1));
+
+                // Trouver l'arc correspondant u -> v
+                for (Arc a : u.arc) {
+                    if (a.Boulevardsuiv == v) {
+                        tempsTotal += a.temps;
+                        nbAretes++;
+                        break;
+                    }
+                }
+            }
+
+
+            // enlever le premier sommet pour éviter les doublons
+            if (!cheminGlobal.isEmpty() && !sousChemin.isEmpty()) {
+                sousChemin.remove(0);
+            }
+
+            cheminGlobal.addAll(sousChemin);
+            courant = cible;
+        }
+
+        // retour au dépôt
+        dijkstra(ville, courant);
+        ArrayList<String> retour = reconstruireChemin(depot);
+        for (int x = 0; x < retour.size() - 1; x++) {
+            Boulevard u = ville.get(retour.get(x));
+            Boulevard v = ville.get(retour.get(x + 1));
+
+            for (Arc a : u.arc) {
+                if (a.Boulevardsuiv == v) {
+                    tempsTotal += a.temps;
+                    nbAretes++;
+                    break;
+                }
+            }
+        }
+
+        if (!retour.isEmpty()) retour.remove(0);
+        System.out.println("Temps total de la tournée (MST) : " + tempsTotal + " unités");
+        System.out.println("Nombre total d'arêtes parcourues : " + nbAretes);
+
+        cheminGlobal.addAll(retour);
+
+        return cheminGlobal;
     }
 
 }
