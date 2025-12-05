@@ -84,7 +84,7 @@ public class LectureDoc {
             BufferedReader br2 = new BufferedReader(new InputStreamReader(new FileInputStream("src/montpellier_3500_optimise_indice_final.txt")));
             while ((ligne = br2.readLine()) != null) {
                 if (ligne.isBlank()) continue;
-                traiterLigneH2(ligne, reseau);
+                traiterLigneH3(ligne, reseau);
             }
             br2.close();
             return reseau;
@@ -101,6 +101,8 @@ public class LectureDoc {
         String nomIntersection = t[1];
 
         Boulevard b = map.get(nomIntersection);
+
+        b.quartier = quartier;
 
         for (int i = 2; i + 4 < t.length; i += 5) {
 
@@ -147,6 +149,7 @@ public class LectureDoc {
 
         Boulevard b = map.get(nomIntersection);
 
+        b.quartier = quartier;
         for (int i = 2; i + 4 < t.length; i += 5) {
 
             String nomRue = t[i];
@@ -197,6 +200,7 @@ public class LectureDoc {
         String nomIntersection = t[1];
 
         Boulevard b = map.get(nomIntersection);
+        b.quartier = quartier;
 
         for (int i = 2; i + 4 < t.length; i += 5) {
 
