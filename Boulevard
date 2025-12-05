@@ -8,6 +8,7 @@ public class Boulevard {
     public Arc arcPred = null;    // l’arc qui mène à ce boulevard
     public boolean marque = false;
     public int temps;
+    public boolean ptDeCollecte;
 
 
     public Boulevard() {
