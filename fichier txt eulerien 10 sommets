@@ -11,6 +11,21 @@ PalaisGarnier;RueRoyale;3;100;Concorde;AvenueDeLOpera;5;100;LesHalles;GrandBoule
 LesHalles;AvenueDeLOpera;5;100;PalaisGarnier;RueDeRivoli;5;100;Bastille;RueTurbigo;4;100;Republique;BdSaintMichel;10;100;CatacombesDeParis;
 CatacombesDeParis;BdRaspail;8;100;Concorde;BdSaintMichel;10;100;LesHalles;AugusteBlanqui;5;100;PlaceDItalie;Ruerandom2;5;100;ArcDeTriomphe;
 
+mixe
+Centre;Nation;BdDiderot;0;5;100;GareDeLyon;BdVoltaire;0;8;100;Republique;
+Centre;GareDeLyon;BdDiderot;0;5;100;Nation;RueDeLyon;0;3;100;Bastille;
+Centre;Republique;BdVoltaire;0;8;100;Nation;BdBeaumarchais;1;5;100;Bastille;RueTurbigo;0;4;100;LesHalles;GrandBoulevard;1;16;100;PalaisGarnier;
+Centre;Bastille;RueDeLyon;0;3;100;GareDeLyon;BdBeaumarchais;1;5;100;Republique;RueDeRivoli;1;5;100;LesHalles;BdDeLHopital;0;7;100;PlaceDItalie;
+Centre;PlaceDItalie;BdDeLHopital;0;7;100;Bastille;AugusteBlanqui;0;5;100;CatacombesDeParis;
+Centre;ArcDeTriomphe;Ruerandom1;0;5;100;PalaisGarnier;Ruerandom2;0;5;100;CatacombesDeParis;
+Centre;Concorde;RueRoyale;0;3;100;PalaisGarnier;BdRaspail;0;8;100;CatacombesDeParis;
+Centre;PalaisGarnier;RueRoyale;0;3;100;Concorde;AvenueDeLOpera;1;5;100;LesHalles;GrandBoulevard;1;16;100;Republique;Ruerandom1;0;5;100;ArcDeTriomphe;
+Centre;LesHalles;AvenueDeLOpera;1;5;100;PalaisGarnier;RueDeRivoli;1;5;100;Bastille;RueTurbigo;0;4;100;Republique;BdSaintMichel;0;10;100;CatacombesDeParis;
+Centre;CatacombesDeParis;BdRaspail;0;8;100;Concorde;BdSaintMichel;0;10;100;LesHalles;AugusteBlanqui;0;5;100;PlaceDItalie;Ruerandom2;0;5;100;ArcDeTriomphe;
+
+
+
+
 
 semi eulerien
 
