@@ -226,26 +226,6 @@ public class LectureDoc {
             if (!existeAller) {
                 b.arc.add(a);
             }
-
-            Arc aInverse = new Arc();
-            aInverse.nom = nomRue;
-            aInverse.simpleEtSensDouble =  false;
-            aInverse.temps = temps;
-            aInverse.tonne = tonne;
-            aInverse.Boulevardprec = b2;
-            aInverse.Boulevardsuiv = b;
-
-
-            boolean existeRetour = false;
-            for (Arc x : b2.arc) {
-                if (x.Boulevardsuiv == b) {
-                    existeRetour = true;
-                    break;
-                }
-            }
-            if (!existeRetour) {
-                b2.arc.add(aInverse);
-            }
         }
     }
 
@@ -314,25 +294,26 @@ public class LectureDoc {
             if (!existeAller) {
                 b.arc.add(a);
             }
+            if (indice ==1) {
+                Arc aInverse = new Arc();
+                aInverse.nom = nomRue;
+                aInverse.simpleEtSensDouble = (indice == 1);
+                aInverse.temps = temps;
+                aInverse.tonne = tonne;
+                aInverse.Boulevardprec = b2;
+                aInverse.Boulevardsuiv = b;
 
-            Arc aInverse = new Arc();
-            aInverse.nom = nomRue;
-            aInverse.simpleEtSensDouble =  (indice == 1);
-            aInverse.temps = temps;
-            aInverse.tonne = tonne;
-            aInverse.Boulevardprec = b2;
-            aInverse.Boulevardsuiv = b;
 
-
-            boolean existeRetour = false;
-            for (Arc x : b2.arc) {
-                if (x.Boulevardsuiv == b) {
-                    existeRetour = true;
-                    break;
+                boolean existeRetour = false;
+                for (Arc x : b2.arc) {
+                    if (x.Boulevardsuiv == b) {
+                        existeRetour = true;
+                        break;
+                    }
                 }
-            }
-            if (!existeRetour) {
-                b2.arc.add(aInverse);
+                if (!existeRetour) {
+                    b2.arc.add(aInverse);
+                }
             }
         }
     }
