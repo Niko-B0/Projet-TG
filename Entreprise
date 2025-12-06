@@ -446,6 +446,577 @@ public class Entreprise {
         return cheminGlobal;
     }
 
+
+public void afficher_Chemin(LinkedList<Arc> parcour) {
+        for (Arc element : parcour) {
+            System.out.println(element.nom);
+        }
+    }
+    public void afficher_Chemin2(ArrayList<Arc> parcour) {
+        for (Arc element : parcour) {
+            System.out.println(element.nom);
+        }
+    }
+
+    public LinkedList<Arc> eulerien(Boulevard depart, HashMap<String, Boulevard> graph) {
+        // Calcul des degrés entrants et sortants
+        Map<Boulevard, Integer> inDegree = new HashMap<>();
+        Map<Boulevard, Integer> outDegree = new HashMap<>();
+
+        // Vérification des conditions pour un graphe eulérien
+        for (Boulevard b : graph.values()) {
+            int in = inDegree.getOrDefault(b, 0);
+            int out = outDegree.getOrDefault(b, 0);
+            if (in != out) {
+                System.err.println("Erreur : le graphe n'est pas eulérien (aucun circuit eulérien possible).");
+                return null;
+            }
+        }
+
+        // Algorithme d’Hierholzer
+        Stack<Arc> pileArcs = new Stack<>();
+        Stack<Boulevard> pile = new Stack<>();
+        LinkedList<Arc> resultat = new LinkedList<>();
+        Map<Boulevard, LinkedList<Arc>> restants = new HashMap<>();
+
+        for (Boulevard b : graph.values()) {
+            restants.put(b, new LinkedList<>(b.arc));
+        }
+
+        pile.push(depart);
+
+        while (!pile.isEmpty()) {
+            Boulevard courant = pile.peek();
+            restants.putIfAbsent(courant, new LinkedList<>(courant.arc));
+            LinkedList<Arc> liste = restants.get(courant);
+            if (!liste.isEmpty()) {
+                Arc arc = liste.removeFirst();
+                pile.push(arc.Boulevardsuiv);
+                pileArcs.push(arc);
+                //  Si cet arc représente une arête
+                // alors on supprime immédiatement son arc inverse dans la liste des restants
+                if (arc.simpleEtSensDouble) {
+                    Boulevard src = arc.Boulevardprec;
+                    Boulevard dst = arc.Boulevardsuiv;
+
+                    // chercher l'arc inverse et le supprimer
+                    LinkedList<Arc> listDst = restants.get(dst);
+                    if (listDst != null) {
+                        Arc inverseToRemove = null;
+                        for (Arc candidate : listDst) {
+
+                            if (candidate.Boulevardsuiv == src) {
+                                inverseToRemove = candidate;
+                                break;
+                            }
+                        }
+                        if (inverseToRemove != null) {
+                            listDst.remove(inverseToRemove);
+                        }
+                    }
+                }
+            } else {
+                pile.pop();
+                if (!pileArcs.isEmpty()) {
+                    resultat.addFirst(pileArcs.pop());
+                }
+            }
+        }
+
+        return resultat;
+    }
+
+
+    public LinkedList<Arc> semi_Eulerien(Boulevard depart, HashMap<String, Boulevard> graph) {
+        // Calcul des degrés entrants et sortants
+        Map<Boulevard, Integer> inDegree = new HashMap<>();
+        Map<Boulevard, Integer> outDegree = new HashMap<>();
+
+        for (Boulevard b : graph.values()) {
+            outDegree.put(b, b.arc.size());
+            inDegree.putIfAbsent(b, 0); // init si pas encore présent
+            for (Arc a : b.arc) {
+                inDegree.put(a.Boulevardsuiv, inDegree.getOrDefault(a.Boulevardsuiv, 0) + 1);
+                outDegree.putIfAbsent(a.Boulevardsuiv, 0);
+            }
+        }
+
+        // Vérification des conditions pour un chemin eulérien
+        Boulevard start = null;
+        Boulevard end = null;
+        for (Boulevard b : graph.values()) {
+            int in = inDegree.getOrDefault(b, 0);
+            int out = outDegree.getOrDefault(b, 0);
+            if (out - in == 1) {
+                if (start != null) { // il ne peut y avoir qu'un point de départ
+                    System.err.println("Erreur : le graphe n'est pas semi-eulérien");
+                    return null;
+                }
+                start = b;
+            } else if (in - out == 1) {
+                if (end != null) { // il ne peut y avoir qu'un point d'arrivée
+                    System.err.println("Erreur : le graphe n'est pas semi-eulérien");
+                    return null;
+                }
+                end = b;
+            } else if (in != out) {
+                System.err.println("Erreur : le graphe n'est pas semi-eulérien");
+                return null;
+            }
+        }
+
+        if (start == null) start = depart; // si circuit eulérien, on peut partir de n'importe où
+
+        // Algorithme d’Hierholzer
+        Stack<Arc> pileArcs = new Stack<>();
+        Stack<Boulevard> pile = new Stack<>();
+        LinkedList<Arc> resultat = new LinkedList<>();
+        Map<Boulevard, LinkedList<Arc>> restants = new HashMap<>();
+
+        pile.push(start);
+        restants.put(start, new LinkedList<>(start.arc));
+
+        while (!pile.isEmpty()) {
+            Boulevard courant = pile.peek();
+            restants.putIfAbsent(courant, new LinkedList<>(courant.arc));
+            LinkedList<Arc> liste = restants.get(courant);
+
+            if (!liste.isEmpty()) {
+                Arc arc = liste.removeFirst();
+                pile.push(arc.Boulevardsuiv);
+                pileArcs.push(arc);
+            } else {
+                pile.pop();
+                if (!pileArcs.isEmpty()) {
+                    resultat.addFirst(pileArcs.pop());
+                }
+            }
+        }
+
+        return resultat;
+    }
+
+
+
+    public Boulevard getMin(ArrayList<Boulevard> liste) {
+        Boulevard min = null;
+        int meilleurTemps = Integer.MAX_VALUE;
+
+        for (Boulevard b : liste) {
+            if (b.temps < meilleurTemps) {
+                meilleurTemps = b.temps;
+                min = b;
+            }
+        }
+        return min;
+    }
+
+    public static class PathResult {
+        public int distance;
+        public List<Arc> path;
+        public PathResult(int distance, List<Arc> path) {
+            this.distance = distance;
+            this.path = path;
+        }
+    }
+
+    // ===================================================================
+    //                      POSTIER CHINOIS COMPLET
+    // ===================================================================
+
+    public LinkedList<Arc> postierChinois(HashMap<String, Boulevard> graph, Boulevard start) {
+
+        // calcul des degres
+        Map<Boulevard, Integer> inDegree = new HashMap<>();
+        Map<Boulevard, Integer> outDegree = new HashMap<>();
+        computeDegrees(graph, inDegree, outDegree);
+
+        // prise en compte des desequilibres
+        List<Boulevard> surplusOut = new ArrayList<>();
+        List<Boulevard> surplusIn = new ArrayList<>();
+        findImbalancedVertices(inDegree, outDegree, surplusOut, surplusIn);
+        // Si deja equilibré
+        if (surplusOut.isEmpty()) {
+            return hierholzer(start, graph, new ArrayList<>());
+        }
+        //determine les chemins supplementaire pour equilibre le graph
+        List<List<Arc>> duplicatePaths =
+                matchImbalances(surplusOut, surplusIn, graph);
+        // fusionne les chinmin pour equilibrer le graph
+        List<Arc> extraArcs = new ArrayList<>();
+        for (List<Arc> path : duplicatePaths) {
+            for (Arc a : path) {
+                Arc copy = new Arc();
+                copy.nom = a.nom;
+                copy.temps = a.temps;
+                copy.tonne = a.tonne;
+                copy.Boulevardprec = a.Boulevardprec;
+                copy.Boulevardsuiv = a.Boulevardsuiv;
+                extraArcs.add(copy);
+            }
+        }
+        for (Arc a : extraArcs) {
+            a.Boulevardprec.arc.add(a);
+        }
+        //applique hierholser sur le graph equilibre
+        return hierholzer(start, graph,extraArcs);
+    }
+
+
+
+// ===================================================================
+//                           DEGRÉS
+// ===================================================================
+
+    private void computeDegrees(HashMap<String, Boulevard> graph,
+                                Map<Boulevard, Integer> inDegree,
+                                Map<Boulevard, Integer> outDegree) {
+
+        for (Boulevard b : graph.values()) {
+            outDegree.put(b, b.arc.size());
+            inDegree.putIfAbsent(b, 0);
+
+            for (Arc a : b.arc) {
+                Boulevard v = a.Boulevardsuiv;
+                inDegree.put(v, inDegree.getOrDefault(v, 0) + 1);
+                outDegree.putIfAbsent(v, 0);
+            }
+        }
+        /*
+        System.out.println("=== DEGRES ===");
+        for (Boulevard b : graph.values()) {
+            int tot = inDegree.get(b)+ outDegree.get(b);
+            System.out.println(b.nom + "  IN=" + inDegree.get(b) + "  OUT=" + outDegree.get(b)+ "  TOT="+ tot);
+        }
+
+         */
+    }
+
+
+
+// ===================================================================
+//                   RECHERCHE DES DÉSÉQUILIBRES
+// ===================================================================
+
+    private void findImbalancedVertices(Map<Boulevard, Integer> inDegree,
+                                        Map<Boulevard, Integer> outDegree,
+                                        List<Boulevard> surplusOut,
+                                        List<Boulevard> surplusIn) {
+
+        for (Boulevard b : inDegree.keySet()) {
+            int in = inDegree.get(b);
+            int out = outDegree.get(b);
+
+            if (out > in) {
+                for (int k = 0; k < out - in; k++) surplusOut.add(b);
+            } else if (in > out) {
+                for (int k = 0; k < in - out; k++) surplusIn.add(b);
+            }
+        }
+        /*
+        System.out.println("=== SURPLUS OUT ===");
+        for (Boulevard b : surplusOut) System.out.println(b.nom);
+
+        System.out.println("=== SURPLUS IN ===");
+        for (Boulevard b : surplusIn) System.out.println(b.nom);
+         */
+    }
+
+
+
+// ===================================================================
+//                 DIJKSTRA AVEC PARENTS & ARC UTILISÉ
+// ===================================================================
+
+    private Map<Boulevard, Boulevard> parentsDijkstra;
+    private Map<Boulevard, Arc> arcUsedDijkstra;
+
+    public void dijkstraWithParents(HashMap<String, Boulevard> ville, Boulevard source) {
+
+        parentsDijkstra = new HashMap<>();
+        arcUsedDijkstra = new HashMap<>();
+
+        for (Boulevard b : ville.values()) {
+            b.temps = Integer.MAX_VALUE;
+            b.marque = false;
+        }
+
+        source.temps = 0;
+
+        ArrayList<Boulevard> Q = new ArrayList<>();
+        Q.add(source);
+
+        while (!Q.isEmpty()) {
+            Boulevard courant = getMin(Q);
+            Q.remove(courant);
+            courant.marque = true;
+
+            for (Arc a : courant.arc) {
+                Boulevard succ = a.Boulevardsuiv;
+                if (succ.marque) continue;
+
+                int newCost = courant.temps + a.temps;
+                if (newCost < succ.temps) {
+                    succ.temps = newCost;
+                    parentsDijkstra.put(succ, courant);
+                    arcUsedDijkstra.put(succ, a);
+                    if (!Q.contains(succ)) Q.add(succ);
+                }
+            }
+        }
+    }
+
+
+
+
+    // Reconstruction d’un chemin
+    private List<Arc> reconstruireChemin(Boulevard source, Boulevard target) {
+
+        LinkedList<Arc> path = new LinkedList<>();
+
+        Boulevard cur = target;
+        while (cur != null && !cur.equals(source)) {
+            Arc a = arcUsedDijkstra.get(cur);
+            if (a == null) return new ArrayList<>();
+            path.addFirst(a);
+            cur = parentsDijkstra.get(cur);
+        }
+
+        return path;
+    }
+
+
+
+// ===================================================================
+//     CALCUL OPTIMISÉ DES PLUS COURTS CHEMINS (IN → OUT UNIQUEMENT)
+// ===================================================================
+
+    private Map<Boulevard, Map<Boulevard, PathResult>>
+    computeTargetedShortestPaths(
+            List<Boulevard> surplusIn,
+            List<Boulevard> surplusOut,
+            HashMap<String, Boulevard> graph) {
+
+        Map<Boulevard, Map<Boulevard, PathResult>> result = new HashMap<>();
+
+        for (Boulevard source : surplusIn) {
+
+            // Lancer Dijkstra uniquement depuis ce sommet
+            dijkstraWithParents(graph, source);
+
+            Map<Boulevard, PathResult> mapToTargets = new HashMap<>();
+
+            // Extraire uniquement les distances utiles
+            for (Boulevard target : surplusOut) {
+
+                if (target.temps == Integer.MAX_VALUE) continue;
+
+                List<Arc> path = reconstruireChemin(source, target);
+                mapToTargets.put(target,
+                        new PathResult(target.temps, path));
+            }
+
+            result.put(source, mapToTargets);
+        }
+
+        return result;
+    }
+
+
+
+// ===================================================================
+//     APARIEMENT OPTIMAL AVEC LE NOUVEAU CALCUL DES CHEMINS
+// ===================================================================
+
+    private List<List<Arc>> matchImbalances(
+            List<Boulevard> surplusOut,
+            List<Boulevard> surplusIn,
+            HashMap<String, Boulevard> graph) {
+
+        // Calcul optimisé IN → OUT uniquement
+        Map<Boulevard, Map<Boulevard, PathResult>> shortestPaths =
+                computeTargetedShortestPaths(surplusIn, surplusOut, graph);
+
+        int n = surplusIn.size();
+        final int INF = 1_000_000_000;
+        int[][] cost = new int[n][n];
+
+        // Construction de la matrice de coût pour Hungarian
+        for (int i = 0; i < n; i++) {
+            Boulevard from = surplusIn.get(i);
+            var sp = shortestPaths.get(from);
+
+            for (int j = 0; j < n; j++) {
+                Boulevard to = surplusOut.get(j);
+
+                if (sp == null || !sp.containsKey(to)
+                        || sp.get(to).path.isEmpty()) {
+                    cost[i][j] = INF;
+                } else {
+                    cost[i][j] = sp.get(to).distance;
+                }
+            }
+        }
+
+        // Appariement optimal
+        int[] assignment = hungarian(cost);
+
+        List<List<Arc>> results = new ArrayList<>();
+
+        for (int j = 0; j < n; j++) {
+            int i = assignment[j];
+
+            Boulevard from = surplusIn.get(i);
+            Boulevard to = surplusOut.get(j);
+
+            PathResult pr = shortestPaths.get(from).get(to);
+            System.out.println(from.nom + " -> " + to.nom);
+            if (pr != null) {
+                results.add(pr.path);
+            }
+
+        }
+        /*
+        // Affichage détaillé (facultatif)
+        int matchNum = 1;
+        for (List<Arc> path : results) {
+            System.out.println("Chemin " + matchNum + " :");
+
+            if (path.isEmpty()) {
+                System.out.println("  Pas de chemin disponible");
+            } else {
+                Boulevard current = path.get(0).Boulevardprec;
+                System.out.println("  Départ : " + current.nom);
+
+                for (Arc a : path) {
+                    System.out.println("    -> " + a.nom
+                            + " (de " + a.Boulevardprec.nom
+                            + " à " + a.Boulevardsuiv.nom
+                            + ", temps : " + a.temps + ")");
+                    current = a.Boulevardsuiv;
+                }
+
+                System.out.println("  Arrivée : " + current.nom);
+            }
+
+            matchNum++;
+            System.out.println();
+        }
+         */
+
+        return results;
+    }
+
+
+
+// ===================================================================
+//               ALGORITHME DE HIERHOLZER (FINAL)
+// ===================================================================
+
+    private LinkedList<Arc> hierholzer(Boulevard start,
+                                       HashMap<String, Boulevard> graph,
+                                       List<Arc> extraArcs) {
+
+        Map<Boulevard, LinkedList<Arc>> restants = new HashMap<>();
+
+        for (Boulevard b : graph.values()) {
+            restants.put(b, new LinkedList<>(b.arc));
+        }
+
+        Stack<Boulevard> pile = new Stack<>();
+        Stack<Arc> pileArcs = new Stack<>();
+        LinkedList<Arc> resultat = new LinkedList<>();
+
+        pile.push(start);
+
+        while (!pile.isEmpty()) {
+            System.out.println("--");
+            Boulevard courant = pile.peek();
+            LinkedList<Arc> list = restants.get(courant);
+
+            if (list != null && !list.isEmpty()) {
+                Arc a = list.removeFirst();
+                pile.push(a.Boulevardsuiv);
+                pileArcs.push(a);
+            } else {
+                pile.pop();
+                if (!pileArcs.isEmpty())
+                    resultat.addFirst(pileArcs.pop());
+            }
+        }
+
+        return resultat;
+    }
+
+
+
+// ===================================================================
+//                     HUNGARIAN ALGORITHM COMPLET
+// ===================================================================
+
+    public int[] hungarian(int[][] cost) {
+        int n = cost.length;
+        int m = cost[0].length;
+
+        int[] u = new int[n + 1];
+        int[] v = new int[m + 1];
+        int[] p = new int[m + 1];
+        int[] way = new int[m + 1];
+
+        for (int i = 1; i <= n; i++) {
+            p[0] = i;
+            int j0 = 0;
+            int[] minv = new int[m + 1];
+            boolean[] used = new boolean[m + 1];
+
+            Arrays.fill(minv, Integer.MAX_VALUE);
+
+            do {
+                used[j0] = true;
+                int i0 = p[j0];
+                int delta = Integer.MAX_VALUE;
+                int j1 = 0;
+
+                for (int j = 1; j <= m; j++) {
+                    if (!used[j]) {
+                        int cur = cost[i0 - 1][j - 1] - u[i0] - v[j];
+                        if (cur < minv[j]) {
+                            minv[j] = cur;
+                            way[j] = j0;
+                        }
+                        if (minv[j] < delta) {
+                            delta = minv[j];
+                            j1 = j;
+                        }
+                    }
+                }
+
+                for (int j = 0; j <= m; j++) {
+                    if (used[j]) {
+                        u[p[j]] += delta;
+                        v[j] -= delta;
+                    } else {
+                        minv[j] -= delta;
+                    }
+                }
+
+                j0 = j1;
+            } while (p[j0] != 0);
+
+            do {
+                int j1 = way[j0];
+                p[j0] = p[j1];
+                j0 = j1;
+            } while (j0 != 0);
+        }
+
+        int[] assignment = new int[m];
+        for (int j = 1; j <= m; j++) {
+            assignment[j - 1] = p[j] - 1;
+        }
+        return assignment;
+    }
+
 }
 
 
